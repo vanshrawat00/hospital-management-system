@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediCare — Hospital Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span>✚</span><div><b>MediCare</b><small>Hospital System</small></div></div>
+    <nav>
+      <button class="nav active" data-page="dashboard">⌂ <span>Dashboard</span></button>
+      <button class="nav" data-page="patients">♙ <span>Patients</span></button>
+      <button class="nav" data-page="doctors">⚕ <span>Doctors</span></button>
+      <button class="nav" data-page="appointments">▣ <span>Appointments</span></button>
+    </nav>
+    <div class="side-footer">Hospital Management<br><small>Internship Project</small></div>
+  </aside>
+
+  <main>
+    <header>
+      <div><button id="mobileMenu" class="mobile-menu">☰</button><h1 id="pageTitle">Dashboard</h1><p id="pageSub">Overview of hospital operations</p></div>
+      <div class="header-right"><span id="date"></span><span class="avatar">V</span></div>
+    </header>
+
+    <section id="dashboard" class="page active-page">
+      <div class="cards">
+        <div class="card"><div class="icon blue">♙</div><div><small>Total Patients</small><strong id="patientCount">0</strong></div></div>
+        <div class="card"><div class="icon green">⚕</div><div><small>Total Doctors</small><strong id="doctorCount">0</strong></div></div>
+        <div class="card"><div class="icon purple">▣</div><div><small>Appointments</small><strong id="appointmentCount">0</strong></div></div>
+        <div class="card"><div class="icon orange">✓</div><div><small>Today's Visits</small><strong id="todayCount">0</strong></div></div>
+      </div>
+      <div class="grid-two">
+        <div class="panel"><div class="panel-head"><h2>Recent Patients</h2><button class="link-btn" data-go="patients">View all</button></div><div id="recentPatients"></div></div>
+        <div class="panel"><div class="panel-head"><h2>Upcoming Appointments</h2><button class="link-btn" data-go="appointments">View all</button></div><div id="upcomingAppointments"></div></div>
+      </div>
+    </section>
+
+    <section id="patients" class="page">
+      <div class="toolbar"><div><h2>Patient Records</h2><p>Manage patient information</p></div><div class="actions"><input id="patientSearch" placeholder="Search patients..."><button class="primary" onclick="openPatientModal()">+ Add Patient</button></div></div>
+      <div class="panel table-panel"><table><thead><tr><th>ID</th><th>Patient</th><th>Age</th><th>Gender</th><th>Condition</th><th>Doctor</th><th>Phone</th><th>Actions</th></tr></thead><tbody id="patientTable"></tbody></table></div>
+    </section>
+
+    <section id="doctors" class="page">
+      <div class="toolbar"><div><h2>Doctors</h2><p>Manage hospital doctors</p></div><button class="primary" onclick="openDoctorModal()">+ Add Doctor</button></div>
+      <div id="doctorGrid" class="doctor-grid"></div>
+    </section>
+
+    <section id="appointments" class="page">
+      <div class="toolbar"><div><h2>Appointments</h2><p>Schedule and manage appointments</p></div><button class="primary" onclick="openAppointmentModal()">+ New Appointment</button></div>
+      <div class="panel table-panel"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead><tbody id="appointmentTable"></tbody></table></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal"><div class="modal-box"><div class="modal-head"><h2 id="modalTitle">Add</h2><button onclick="closeModal()">×</button></div><form id="modalForm"></form></div></div>
+  <div id="toast" class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
