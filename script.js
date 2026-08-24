@@ -1,78 +1,105 @@
-const $=s=>document.querySelector(s);
-const $$=s=>document.querySelectorAll(s);
-let patients=JSON.parse(localStorage.getItem("mc_patients")||"[]");
-let doctors=JSON.parse(localStorage.getItem("mc_doctors")||"[]");
-let appointments=JSON.parse(localStorage.getItem("mc_appointments")||"[]");
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const today=()=>new Date().toISOString().slice(0,10);
+let patients=JSON.parse(localStorage.getItem("mcp_patients")||"[]");
+let doctors=JSON.parse(localStorage.getItem("mcp_doctors")||"[]");
+let appointments=JSON.parse(localStorage.getItem("mcp_appointments")||"[]");
+let bills=JSON.parse(localStorage.getItem("mcp_bills")||"[]");
+let medicines=JSON.parse(localStorage.getItem("mcp_medicines")||"[]");
+let beds=JSON.parse(localStorage.getItem("mcp_beds")||"[]");
+let emergencies=JSON.parse(localStorage.getItem("mcp_emergencies")||"[]");
+let activity=JSON.parse(localStorage.getItem("mcp_activity")||"[]");
+let patientFilter="all";
 
 if(!patients.length) patients=[
-{id:"P1001",name:"Aarav Sharma",age:28,gender:"Male",disease:"Fever",doctor:"Dr. Ananya Mehta",phone:"9876543210"},
-{id:"P1002",name:"Priya Singh",age:34,gender:"Female",disease:"Migraine",doctor:"Dr. Rahul Verma",phone:"9812345678"},
-{id:"P1003",name:"Rohan Kumar",age:45,gender:"Male",disease:"Diabetes",doctor:"Dr. Ananya Mehta",phone:"9898989898"}];
+{id:"P1001",name:"Aarav Sharma",age:28,gender:"Male",disease:"Fever",doctor:"Dr. Ananya Mehta",phone:"9876543210",status:"In Patient",critical:false,created:today()},
+{id:"P1002",name:"Priya Singh",age:34,gender:"Female",disease:"Migraine",doctor:"Dr. Rahul Verma",phone:"9812345678",status:"In Patient",critical:false,created:today()},
+{id:"P1003",name:"Rohan Kumar",age:45,gender:"Male",disease:"Diabetes",doctor:"Dr. Ananya Mehta",phone:"9898989898",status:"Discharged",critical:false,created:"2026-08-20"},
+{id:"P1004",name:"Meera Gupta",age:62,gender:"Female",disease:"Cardiac Observation",doctor:"Dr. Rahul Verma",phone:"9900112233",status:"In Patient",critical:true,created:today()}];
 if(!doctors.length) doctors=[
-{id:"D101",name:"Dr. Ananya Mehta",specialization:"General Physician"},
-{id:"D102",name:"Dr. Rahul Verma",specialization:"Cardiologist"},
-{id:"D103",name:"Dr. Neha Kapoor",specialization:"Dermatologist"}];
+{id:"D101",name:"Dr. Ananya Mehta",specialization:"General Physician",department:"General Medicine",status:"Available"},
+{id:"D102",name:"Dr. Rahul Verma",specialization:"Cardiologist",department:"Cardiology",status:"Available"},
+{id:"D103",name:"Dr. Neha Kapoor",specialization:"Dermatologist",department:"Dermatology",status:"Busy"},
+{id:"D104",name:"Dr. Arjun Malhotra",specialization:"Orthopedic Surgeon",department:"Orthopedics",status:"Available"},
+{id:"D105",name:"Dr. Simran Kaur",specialization:"Pediatrician",department:"Pediatrics",status:"Available"},
+{id:"D106",name:"Dr. Vikram Rao",specialization:"Emergency Medicine",department:"Emergency",status:"On Call"}];
 if(!appointments.length) appointments=[
-{patient:"Aarav Sharma",doctor:"Dr. Ananya Mehta",date:new Date().toISOString().slice(0,10),time:"10:30 AM",reason:"Routine Checkup",status:"Scheduled"},
-{patient:"Priya Singh",doctor:"Dr. Rahul Verma",date:new Date(Date.now()+86400000).toISOString().slice(0,10),time:"12:00 PM",reason:"Consultation",status:"Scheduled"}];
+{patient:"Aarav Sharma",doctor:"Dr. Ananya Mehta",date:today(),time:"10:30 AM",reason:"Routine Checkup",status:"Scheduled"},
+{patient:"Priya Singh",doctor:"Dr. Rahul Verma",date:today(),time:"12:00 PM",reason:"Consultation",status:"Scheduled"},
+{patient:"Meera Gupta",doctor:"Dr. Rahul Verma",date:today(),time:"03:30 PM",reason:"Cardiac Review",status:"Scheduled"}];
+if(!bills.length) bills=[
+{id:"INV-1001",patient:"Aarav Sharma",service:"Consultation + Room",amount:4500,date:today(),status:"Paid"},
+{id:"INV-1002",patient:"Priya Singh",service:"Diagnostics",amount:1800,date:today(),status:"Pending"},
+{id:"INV-1003",patient:"Rohan Kumar",service:"Pharmacy",amount:1250,date:"2026-08-20",status:"Paid"}];
+if(!medicines.length) medicines=[
+{name:"Paracetamol 500mg",category:"Tablet",batch:"PCM-26A",stock:240,expiry:"2027-05-01",price:2.5},
+{name:"Amoxicillin 500mg",category:"Capsule",batch:"AMX-26B",stock:18,expiry:"2027-02-10",price:8},
+{name:"Insulin Glargine",category:"Injection",batch:"INS-26C",stock:7,expiry:"2026-12-01",price:450},
+{name:"Omeprazole 20mg",category:"Capsule",batch:"OMP-26D",stock:92,expiry:"2027-06-15",price:5}];
+if(!beds.length) beds=[
+{id:"ICU-01",ward:"ICU",status:"Occupied",patient:"Meera Gupta"},{id:"ICU-02",ward:"ICU",status:"Available",patient:""},
+{id:"GEN-01",ward:"General",status:"Occupied",patient:"Aarav Sharma"},{id:"GEN-02",ward:"General",status:"Available",patient:""},
+{id:"GEN-03",ward:"General",status:"Occupied",patient:"Priya Singh"},{id:"GEN-04",ward:"General",status:"Available",patient:""},
+{id:"PVT-01",ward:"Private",status:"Available",patient:""},{id:"PVT-02",ward:"Private",status:"Occupied",patient:""}];
+if(!emergencies.length) emergencies=[{id:"ER-001",patient:"Meera Gupta",age:62,condition:"Chest Pain",priority:"Critical",time:"08:15 AM",status:"Under Care"}];
+if(!activity.length) activity=["System initialized","Patient P1004 registered","Appointment created for Aarav Sharma","Pharmacy stock checked"];
 save();
 
-function save(){localStorage.setItem("mc_patients",JSON.stringify(patients));localStorage.setItem("mc_doctors",JSON.stringify(doctors));localStorage.setItem("mc_appointments",JSON.stringify(appointments));}
-function toast(msg){let t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+function save(){localStorage.setItem("mcp_patients",JSON.stringify(patients));localStorage.setItem("mcp_doctors",JSON.stringify(doctors));localStorage.setItem("mcp_appointments",JSON.stringify(appointments));localStorage.setItem("mcp_bills",JSON.stringify(bills));localStorage.setItem("mcp_medicines",JSON.stringify(medicines));localStorage.setItem("mcp_beds",JSON.stringify(beds));localStorage.setItem("mcp_emergencies",JSON.stringify(emergencies));localStorage.setItem("mcp_activity",JSON.stringify(activity));}
+function log(x){activity.unshift(x);activity=activity.slice(0,7);save()}
+function toast(x){let t=$("#toast");t.textContent=x;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
 function initials(n){return n.replace("Dr.","").trim().split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase()}
-function fmtDate(d){return new Date(d+"T00:00:00").toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}
+function fmt(d){return new Date(d+"T00:00:00").toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}
+function money(n){return "₹"+Number(n).toLocaleString("en-IN")}
 
 function render(){
- $("#patientCount").textContent=patients.length;$("#doctorCount").textContent=doctors.length;$("#appointmentCount").textContent=appointments.length;
- let today=new Date().toISOString().slice(0,10);$("#todayCount").textContent=appointments.filter(a=>a.date===today).length;
- let recent=patients.slice(-5).reverse();$("#recentPatients").innerHTML=recent.length?recent.map(p=>`<div class="mini-row"><b>${p.name}</b><span>${p.disease} · ${p.doctor}</span></div>`).join(""):`<div class="empty">No patients yet</div>`;
- let upcoming=appointments.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);$("#upcomingAppointments").innerHTML=upcoming.length?upcoming.map(a=>`<div class="mini-row"><b>${a.patient}</b><span>${fmtDate(a.date)} · ${a.time}</span></div>`).join(""):`<div class="empty">No appointments</div>`;
- renderPatients();renderDoctors();renderAppointments();
+ let occ=beds.filter(b=>b.status==="Occupied").length;
+ $("#patientCount").textContent=patients.length;$("#doctorCount").textContent=doctors.filter(d=>d.status!=="Off Duty").length;
+ $("#appointmentCount").textContent=appointments.filter(a=>a.date===today()).length;$("#occupiedCount").textContent=occ;$("#bedText").textContent="of "+beds.length+" beds";
+ $("#newToday").textContent=patients.filter(p=>p.created===today()).length;$("#discharged").textContent=patients.filter(p=>p.status==="Discharged").length;$("#critical").textContent=patients.filter(p=>p.critical).length;
+ let activeER=emergencies.filter(e=>e.status!=="Resolved");$("#emergencySummary").textContent=activeER.length?activeER.length+" active case(s) require attention.":"No active emergency cases.";
+ let pct=beds.length?Math.round(occ/beds.length*100):0;$("#occupancyPercent").textContent=pct+"%";$("#bedProgress").style.width=pct+"%";
+ for(let w of ["ICU","General","Private"]){let a=beds.filter(b=>b.ward===w),o=a.filter(b=>b.status==="Occupied").length;$("#"+w.toLowerCase()+"Count").textContent=o+"/"+a.length}
+ $("#recentPatients").innerHTML=patients.slice(-4).reverse().map(p=>`<div class="mini-row"><b>${p.name}</b><span>${p.disease} · ${p.status}</span></div>`).join("")||`<div class="empty">No patients</div>`;
+ let aps=appointments.filter(a=>a.date>=today()).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+ $("#upcomingAppointments").innerHTML=aps.map(a=>`<div class="mini-row"><b>${a.patient}</b><span>${a.date===today()?"Today":fmt(a.date)} · ${a.time}</span></div>`).join("")||`<div class="empty">No appointments</div>`;
+ $("#pharmacyAlerts").innerHTML=medicines.filter(m=>m.stock<20).map(m=>`<div class="ph-alert"><span>${m.name}</span><b class="pill low">${m.stock} left</b></div>`).join("")||`<div class="empty">Stock levels normal</div>`;
+ $("#activity").innerHTML=activity.slice(0,5).map((x,i)=>`<div class="activity"><b>${i?"Update":"Live"}:</b> ${x}</div>`).join("");
+ renderPatients();renderDoctors();renderAppointments();renderBills();renderMedicines();renderBeds();renderEmergency();renderReports();
 }
 function renderPatients(filter=""){
  let arr=patients.filter(p=>(p.name+p.id+p.disease+p.doctor).toLowerCase().includes(filter.toLowerCase()));
- $("#patientTable").innerHTML=arr.length?arr.map(p=>`<tr><td><b>${p.id}</b></td><td><b>${p.name}</b></td><td>${p.age}</td><td>${p.gender}</td><td>${p.disease}</td><td>${p.doctor}</td><td>${p.phone}</td><td><button class="table-action" onclick="editPatient('${p.id}')">Edit</button><button class="table-action danger" onclick="deletePatient('${p.id}')">Delete</button></td></tr>`).join(""):`<tr><td colspan="8" class="empty">No patients found</td></tr>`;
+ if(patientFilter!=="all") arr=arr.filter(p=>patientFilter==="Critical"?p.critical:p.status===patientFilter);
+ $("#patientTable").innerHTML=arr.length?arr.map(p=>`<tr><td><b>${p.id}</b></td><td><b>${p.name}</b></td><td>${p.age} / ${p.gender}</td><td>${p.disease}</td><td>${p.doctor}</td><td><span class="pill ${p.critical?"critical":p.status==="Discharged"?"discharged":"inpatient"}">${p.critical?"Critical":p.status}</span></td><td>${p.phone}</td><td><button class="table-action" onclick="editPatient('${p.id}')">Edit</button><button class="table-action danger" onclick="deletePatient('${p.id}')">Delete</button></td></tr>`).join(""):`<tr><td colspan="8" class="empty">No patients found</td></tr>`;
 }
-function renderDoctors(){
- $("#doctorGrid").innerHTML=doctors.length?doctors.map(d=>`<div class="doctor"><div class="doctor-top"><div class="doc-avatar">${initials(d.name)}</div><div><h3>${d.name}</h3><p>${d.id}</p></div></div><div class="special">${d.specialization}</div><button class="table-action danger" onclick="deleteDoctor('${d.id}')">Remove Doctor</button></div>`).join(""):`<div class="empty">No doctors found</div>`;
-}
-function renderAppointments(){
- $("#appointmentTable").innerHTML=appointments.length?appointments.map((a,i)=>`<tr><td><b>${a.patient}</b></td><td>${a.doctor}</td><td>${fmtDate(a.date)}</td><td>${a.time}</td><td>${a.reason}</td><td><span class="pill ${a.status.toLowerCase()}">${a.status}</span></td><td><button class="table-action" onclick="toggleStatus(${i})">${a.status==="Completed"?"Undo":"Complete"}</button><button class="table-action danger" onclick="deleteAppointment(${i})">Delete</button></td></tr>`).join(""):`<tr><td colspan="7" class="empty">No appointments found</td></tr>`;
-}
+function renderDoctors(){$("#doctorGrid").innerHTML=doctors.map(d=>`<div class="doctor"><div class="doctor-top"><div class="doc-avatar">${initials(d.name)}</div><div><h3>${d.name}</h3><p>${d.id} · ${d.department}</p></div></div><div class="special">${d.specialization}</div><div class="doctor-meta"><span class="pill ${d.status==="Available"?"available":"low"}">${d.status}</span><button class="table-action danger" onclick="deleteDoctor('${d.id}')">Remove</button></div></div>`).join("")}
+function renderAppointments(){$("#appointmentTable").innerHTML=appointments.map((a,i)=>`<tr><td><b>${a.patient}</b></td><td>${a.doctor}</td><td>${fmt(a.date)}</td><td>${a.time}</td><td>${a.reason}</td><td><span class="pill ${a.status.toLowerCase()}">${a.status}</span></td><td><button class="table-action" onclick="toggleAppointment(${i})">${a.status==="Completed"?"Undo":"Complete"}</button><button class="table-action danger" onclick="deleteAppointment(${i})">Delete</button></td></tr>`).join("")||`<tr><td colspan="7" class="empty">No appointments</td></tr>`}
+function renderBills(){$("#paidTotal").textContent=money(bills.filter(b=>b.status==="Paid").reduce((s,b)=>s+Number(b.amount),0));$("#pendingTotal").textContent=money(bills.filter(b=>b.status==="Pending").reduce((s,b)=>s+Number(b.amount),0));$("#invoiceCount").textContent=bills.length;$("#billTable").innerHTML=bills.map((b,i)=>`<tr><td><b>${b.id}</b></td><td>${b.patient}</td><td>${b.service}</td><td>${money(b.amount)}</td><td>${fmt(b.date)}</td><td><span class="pill ${b.status.toLowerCase()}">${b.status}</span></td><td><button class="table-action" onclick="toggleBill(${i})">${b.status==="Paid"?"Mark Pending":"Mark Paid"}</button></td></tr>`).join("")}
+function renderMedicines(){$("#medicineCount").textContent=medicines.length;$("#lowStock").textContent=medicines.filter(m=>m.stock<20).length;$("#inventoryValue").textContent=money(medicines.reduce((s,m)=>s+m.stock*m.price,0));$("#medicineTable").innerHTML=medicines.map((m,i)=>`<tr><td><b>${m.name}</b></td><td>${m.category}</td><td>${m.batch}</td><td>${m.stock}</td><td>${fmt(m.expiry)}</td><td>${money(m.price)}</td><td><span class="pill ${m.stock<20?"low":"available"}">${m.stock<20?"Low Stock":"In Stock"}</span></td><td><button class="table-action danger" onclick="deleteMedicine(${i})">Delete</button></td></tr>`).join("")}
+function renderBeds(){$("#bedGrid").innerHTML=beds.map((b,i)=>`<div class="bed-card ${b.status.toLowerCase()}"><div class="bed-number">${b.id}</div><p>${b.ward} Ward</p><span class="pill ${b.status.toLowerCase()}">${b.status}</span>${b.patient?`<div style="margin-top:13px;font-size:11px"><b>Patient:</b> ${b.patient}</div>`:""}<button class="table-action" style="margin-top:14px" onclick="toggleBed(${i})">${b.status==="Occupied"?"Discharge":"Assign Bed"}</button></div>`).join("")}
+function renderEmergency(){$("#emergencyGrid").innerHTML=emergencies.length?emergencies.map((e,i)=>`<div class="emergency-card ${e.priority==="Critical"?"critical-case":""}"><div class="priority">${e.priority.toUpperCase()} · ${e.time}</div><h3>${e.patient}</h3><p>Age ${e.age} · ${e.condition}</p><span class="pill ${e.status==="Resolved"?"completed":"critical"}">${e.status}</span><br><button class="table-action" style="margin-top:14px" onclick="resolveEmergency(${i})">${e.status==="Resolved"?"Reopen":"Resolve Case"}</button></div>`).join(""):`<div class="empty">No emergency cases</div>`}
+function renderReports(){let occ=beds.filter(b=>b.status==="Occupied").length,p=bills.filter(b=>b.status==="Paid").reduce((s,b)=>s+Number(b.amount),0);$("#rPatients").textContent=patients.length;$("#rDoctors").textContent=doctors.length;$("#rAppts").textContent=appointments.length;$("#rBeds").textContent=(beds.length?Math.round(occ/beds.length*100):0)+"%";let deps={};doctors.forEach(d=>deps[d.department]=(deps[d.department]||0)+1);let max=Math.max(...Object.values(deps),1);$("#deptBars").innerHTML=Object.entries(deps).map(([k,v])=>`<div class="bar-row"><div class="bar-label"><span>${k}</span><b>${v}</b></div><div class="bar"><span style="width:${v/max*100}%"></span></div></div>`).join("");$("#reportSummary").innerHTML=`The hospital currently has <b>${patients.length}</b> registered patients, <b>${doctors.length}</b> doctors and <b>${appointments.filter(a=>a.date===today()).length}</b> appointments today.<br><br>Bed occupancy is <b>${beds.length?Math.round(occ/beds.length*100):0}%</b>. Recorded paid revenue is <b>${money(p)}</b>. Pharmacy has <b>${medicines.filter(m=>m.stock<20).length}</b> low-stock alerts.`}
 
-function openModal(title,html){$("#modalTitle").textContent=title;$("#modalForm").innerHTML=html;$("#modal").classList.add("show")}
-function closeModal(){$("#modal").classList.remove("show")}
-function openPatientModal(p=null){
- openModal(p?"Edit Patient":"Add Patient",`<div class="form-grid">
- <div class="field"><label>Patient ID</label><input id="f_id" required value="${p?.id||"P"+(1001+patients.length)}" ${p?"readonly":""}></div>
- <div class="field"><label>Name</label><input id="f_name" required value="${p?.name||""}"></div>
- <div class="field"><label>Age</label><input id="f_age" type="number" min="0" required value="${p?.age||""}"></div>
- <div class="field"><label>Gender</label><select id="f_gender"><option ${p?.gender==="Male"?"selected":""}>Male</option><option ${p?.gender==="Female"?"selected":""}>Female</option><option ${p?.gender==="Other"?"selected":""}>Other</option></select></div>
- <div class="field"><label>Condition / Disease</label><input id="f_disease" required value="${p?.disease||""}"></div>
- <div class="field"><label>Doctor</label><select id="f_doctor">${doctors.map(d=>`<option ${p?.doctor===d.name?"selected":""}>${d.name}</option>`).join("")}</select></div>
- <div class="field full"><label>Phone</label><input id="f_phone" required value="${p?.phone||""}"></div>
- <button class="primary form-submit">${p?"Update":"Add"} Patient</button></div>`);
- $("#modalForm").onsubmit=e=>{e.preventDefault();let obj={id:$("#f_id").value,name:$("#f_name").value,age:$("#f_age").value,gender:$("#f_gender").value,disease:$("#f_disease").value,doctor:$("#f_doctor").value,phone:$("#f_phone").value};let i=patients.findIndex(x=>x.id===obj.id);if(i>=0)patients[i]=obj;else patients.push(obj);save();render();closeModal();toast(p?"Patient updated":"Patient added successfully")};
-}
-function editPatient(id){openPatientModal(patients.find(p=>p.id===id))}
-function deletePatient(id){if(confirm("Delete this patient?")){patients=patients.filter(p=>p.id!==id);save();render();toast("Patient deleted")}}
-function openDoctorModal(){
- openModal("Add Doctor",`<div class="form-grid"><div class="field"><label>Doctor ID</label><input id="d_id" required value="D${101+doctors.length}"></div><div class="field"><label>Doctor Name</label><input id="d_name" required placeholder="Dr. Name"></div><div class="field full"><label>Specialization</label><input id="d_spec" required placeholder="e.g. Cardiologist"></div><button class="primary form-submit">Add Doctor</button></div>`);
- $("#modalForm").onsubmit=e=>{e.preventDefault();doctors.push({id:$("#d_id").value,name:$("#d_name").value,specialization:$("#d_spec").value});save();render();closeModal();toast("Doctor added successfully")};
-}
-function deleteDoctor(id){if(confirm("Remove this doctor?")){doctors=doctors.filter(d=>d.id!==id);save();render();toast("Doctor removed")}}
-function openAppointmentModal(){
- openModal("New Appointment",`<div class="form-grid"><div class="field"><label>Patient</label><select id="a_patient">${patients.map(p=>`<option>${p.name}</option>`).join("")}</select></div><div class="field"><label>Doctor</label><select id="a_doctor">${doctors.map(d=>`<option>${d.name}</option>`).join("")}</select></div><div class="field"><label>Date</label><input id="a_date" type="date" required value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Time</label><input id="a_time" type="time" required value="10:00"></div><div class="field full"><label>Reason</label><input id="a_reason" required placeholder="Routine checkup"></div><button class="primary form-submit">Book Appointment</button></div>`);
- $("#modalForm").onsubmit=e=>{e.preventDefault();let t=$("#a_time").value;let [h,m]=t.split(":");let ap=(+h%12||12)+":"+m+" "+(+h>=12?"PM":"AM");appointments.push({patient:$("#a_patient").value,doctor:$("#a_doctor").value,date:$("#a_date").value,time:ap,reason:$("#a_reason").value,status:"Scheduled"});save();render();closeModal();toast("Appointment booked")};
-}
-function toggleStatus(i){appointments[i].status=appointments[i].status==="Completed"?"Scheduled":"Completed";save();render();toast("Appointment updated")}
-function deleteAppointment(i){if(confirm("Delete this appointment?")){appointments.splice(i,1);save();render();toast("Appointment deleted")}}
+function openModal(t,h){$("#modalTitle").textContent=t;$("#modalForm").innerHTML=h;$("#modal").classList.add("show")}function closeModal(){$("#modal").classList.remove("show")}
+function openPatientModal(p=null){openModal(p?"Edit Patient":"Register Patient",`<div class="form-grid"><div class="field"><label>Patient ID</label><input id="f_id" required value="${p?.id||"P"+(1001+patients.length)}" ${p?"readonly":""}></div><div class="field"><label>Full Name</label><input id="f_name" required value="${p?.name||""}"></div><div class="field"><label>Age</label><input id="f_age" type="number" required value="${p?.age||""}"></div><div class="field"><label>Gender</label><select id="f_gender"><option ${p?.gender==="Male"?"selected":""}>Male</option><option ${p?.gender==="Female"?"selected":""}>Female</option><option>Other</option></select></div><div class="field"><label>Diagnosis / Condition</label><input id="f_disease" required value="${p?.disease||""}"></div><div class="field"><label>Consulting Doctor</label><select id="f_doctor">${doctors.map(d=>`<option ${p?.doctor===d.name?"selected":""}>${d.name}</option>`).join("")}</select></div><div class="field"><label>Phone</label><input id="f_phone" required value="${p?.phone||""}"></div><div class="field"><label>Status</label><select id="f_status"><option ${p?.status==="In Patient"?"selected":""}>In Patient</option><option ${p?.status==="Discharged"?"selected":""}>Discharged</option></select></div><button class="primary form-submit">${p?"Update":"Register"} Patient</button></div>`);$("#modalForm").onsubmit=e=>{e.preventDefault();let o={id:$("#f_id").value,name:$("#f_name").value,age:$("#f_age").value,gender:$("#f_gender").value,disease:$("#f_disease").value,doctor:$("#f_doctor").value,phone:$("#f_phone").value,status:$("#f_status").value,critical:p?.critical||false,created:p?.created||today()};let i=patients.findIndex(x=>x.id===o.id);if(i>=0)patients[i]=o;else patients.push(o);log((p?"Updated":"Registered")+" patient "+o.name);render();closeModal();toast(p?"Patient updated":"Patient registered")}}
+function editPatient(id){openPatientModal(patients.find(p=>p.id===id))}function deletePatient(id){if(confirm("Delete patient?")){patients=patients.filter(p=>p.id!==id);log("Deleted patient "+id);save();render();toast("Patient deleted")}}
+function openDoctorModal(){openModal("Add Doctor",`<div class="form-grid"><div class="field"><label>Doctor ID</label><input id="d_id" value="D${101+doctors.length}" required></div><div class="field"><label>Doctor Name</label><input id="d_name" placeholder="Dr. Name" required></div><div class="field"><label>Specialization</label><input id="d_spec" required></div><div class="field"><label>Department</label><input id="d_dept" required></div><button class="primary form-submit">Add Doctor</button></div>`);$("#modalForm").onsubmit=e=>{e.preventDefault();doctors.push({id:$("#d_id").value,name:$("#d_name").value,specialization:$("#d_spec").value,department:$("#d_dept").value,status:"Available"});log("Added doctor "+$("#d_name").value);save();render();closeModal();toast("Doctor added")}}
+function deleteDoctor(id){if(confirm("Remove doctor?")){doctors=doctors.filter(d=>d.id!==id);log("Removed doctor "+id);save();render();toast("Doctor removed")}}
+function openAppointmentModal(){openModal("New Appointment",`<div class="form-grid"><div class="field"><label>Patient</label><select id="a_patient">${patients.map(p=>`<option>${p.name}</option>`).join("")}</select></div><div class="field"><label>Doctor</label><select id="a_doctor">${doctors.map(d=>`<option>${d.name}</option>`).join("")}</select></div><div class="field"><label>Date</label><input id="a_date" type="date" value="${today()}" required></div><div class="field"><label>Time</label><input id="a_time" type="time" value="10:00" required></div><div class="field full"><label>Reason</label><input id="a_reason" required placeholder="Consultation / follow-up"></div><button class="primary form-submit">Book Appointment</button></div>`);$("#modalForm").onsubmit=e=>{e.preventDefault();let t=$("#a_time").value,[h,m]=t.split(":");let tm=(+h%12||12)+":"+m+" "+(+h>=12?"PM":"AM");appointments.push({patient:$("#a_patient").value,doctor:$("#a_doctor").value,date:$("#a_date").value,time:tm,reason:$("#a_reason").value,status:"Scheduled"});log("Booked appointment for "+$("#a_patient").value);save();render();closeModal();toast("Appointment booked")}}
+function toggleAppointment(i){appointments[i].status=appointments[i].status==="Completed"?"Scheduled":"Completed";log("Appointment marked "+appointments[i].status);save();render();toast("Appointment updated")}function deleteAppointment(i){if(confirm("Delete appointment?")){appointments.splice(i,1);save();render();toast("Appointment deleted")}}
+function openBillModal(){openModal("Create Invoice",`<div class="form-grid"><div class="field"><label>Patient</label><select id="b_patient">${patients.map(p=>`<option>${p.name}</option>`).join("")}</select></div><div class="field"><label>Service</label><input id="b_service" required placeholder="Consultation"></div><div class="field"><label>Amount (₹)</label><input id="b_amount" type="number" required></div><div class="field"><label>Status</label><select id="b_status"><option>Pending</option><option>Paid</option></select></div><button class="primary form-submit">Create Invoice</button></div>`);$("#modalForm").onsubmit=e=>{e.preventDefault();bills.push({id:"INV-"+(1001+bills.length),patient:$("#b_patient").value,service:$("#b_service").value,amount:+$("#b_amount").value,date:today(),status:$("#b_status").value});log("Created invoice");save();render();closeModal();toast("Invoice created")}}
+function toggleBill(i){bills[i].status=bills[i].status==="Paid"?"Pending":"Paid";save();render();toast("Payment status updated")}
+function openMedicineModal(){openModal("Add Medicine",`<div class="form-grid"><div class="field"><label>Medicine</label><input id="m_name" required></div><div class="field"><label>Category</label><input id="m_cat" required></div><div class="field"><label>Batch</label><input id="m_batch" required></div><div class="field"><label>Stock</label><input id="m_stock" type="number" required></div><div class="field"><label>Expiry</label><input id="m_exp" type="date" required></div><div class="field"><label>Unit Price</label><input id="m_price" type="number" step="0.01" required></div><button class="primary form-submit">Add Medicine</button></div>`);$("#modalForm").onsubmit=e=>{e.preventDefault();medicines.push({name:$("#m_name").value,category:$("#m_cat").value,batch:$("#m_batch").value,stock:+$("#m_stock").value,expiry:$("#m_exp").value,price:+$("#m_price").value});log("Added medicine "+$("#m_name").value);save();render();closeModal();toast("Medicine added")}}
+function deleteMedicine(i){if(confirm("Delete medicine?")){medicines.splice(i,1);save();render();toast("Medicine deleted")}}
+function toggleBed(i){if(beds[i].status==="Occupied"){beds[i].status="Available";beds[i].patient=""}else{let name=prompt("Enter patient name to assign:");if(!name)return;beds[i].status="Occupied";beds[i].patient=name}log("Bed "+beds[i].id+" status updated");save();render();toast("Bed status updated")}
+function openBedModal(){openModal("Add Bed",`<div class="form-grid"><div class="field"><label>Bed ID</label><input id="bd_id" required placeholder="GEN-05"></div><div class="field"><label>Ward</label><select id="bd_ward"><option>General</option><option>ICU</option><option>Private</option><option>Emergency</option></select></div><button class="primary form-submit">Add Bed</button></div>`);$("#modalForm").onsubmit=e=>{e.preventDefault();beds.push({id:$("#bd_id").value,ward:$("#bd_ward").value,status:"Available",patient:""});save();render();closeModal();toast("Bed added")}}
+function openEmergencyModal(){openModal("Emergency Case",`<div class="form-grid"><div class="field"><label>Patient Name</label><input id="e_name" required></div><div class="field"><label>Age</label><input id="e_age" type="number" required></div><div class="field full"><label>Condition</label><input id="e_cond" required placeholder="Chest pain, accident, trauma..."></div><div class="field"><label>Priority</label><select id="e_pr"><option>Critical</option><option>High</option><option>Medium</option></select></div><button class="primary form-submit emergency-btn">Create Emergency Case</button></div>`);$("#modalForm").onsubmit=e=>{e.preventDefault();emergencies.push({id:"ER-"+String(100+emergencies.length),patient:$("#e_name").value,age:+$("#e_age").value,condition:$("#e_cond").value,priority:$("#e_pr").value,time:new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}),status:"Under Care"});log("Emergency case opened for "+$("#e_name").value);save();render();closeModal();toast("Emergency case created")}}
+function resolveEmergency(i){emergencies[i].status=emergencies[i].status==="Resolved"?"Under Care":"Resolved";save();render();toast("Emergency status updated")}
 
-const titles={dashboard:["Dashboard","Overview of hospital operations"],patients:["Patients","Manage patient information"],doctors:["Doctors","Manage hospital doctors"],appointments:["Appointments","Schedule and manage appointments"]};
-$$(".nav").forEach(b=>b.onclick=()=>go(b.dataset.page));
-$$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
-function go(page){$$(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page===page));$$(".page").forEach(x=>x.classList.remove("active-page"));$("#"+page).classList.add("active-page");$("#pageTitle").textContent=titles[page][0];$("#pageSub").textContent=titles[page][1];$(".sidebar").classList.remove("open")}
+const titles={dashboard:["Dashboard","Hospital overview & live operations"],patients:["Patients","Complete electronic patient registry"],doctors:["Medical Staff","Doctors, specializations & availability"],appointments:["Appointment Center","Schedule, complete and track consultations"],billing:["Billing & Payments","Invoices, charges and payment tracking"],pharmacy:["Pharmacy & Inventory","Medicine stock and low-stock monitoring"],beds:["Bed Management","Real-time ward occupancy"],emergency:["Emergency & Triage","Priority cases and emergency response"],reports:["Reports & Analytics","Operational snapshot for management"]};
+$$(".nav").forEach(b=>b.onclick=()=>go(b.dataset.page));$$("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+function go(page){$$(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page===page));$$(".page").forEach(x=>x.classList.remove("active-page"));$("#"+page).classList.add("active-page");$("#pageTitle").textContent=titles[page][0];$("#pageSub").textContent=titles[page][1];$("#sidebar").classList.remove("open")}
 $("#patientSearch").oninput=e=>renderPatients(e.target.value);
-$("#mobileMenu").onclick=()=>$(".sidebar").classList.toggle("open");
+$$(".filter").forEach(b=>b.onclick=()=>{$$(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");patientFilter=b.dataset.filter;renderPatients($("#patientSearch").value)});
+$("#mobileMenu").onclick=()=>$("#sidebar").classList.toggle("open");
 $("#date").textContent=new Date().toLocaleDateString("en-IN",{weekday:"short",day:"2-digit",month:"short",year:"numeric"});
 render();

@@ -1,60 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediCare — Hospital Management System</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MediCare Pro — Hospital Management System</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="brand"><span>✚</span><div><b>MediCare</b><small>Hospital System</small></div></div>
-    <nav>
-      <button class="nav active" data-page="dashboard">⌂ <span>Dashboard</span></button>
-      <button class="nav" data-page="patients">♙ <span>Patients</span></button>
-      <button class="nav" data-page="doctors">⚕ <span>Doctors</span></button>
-      <button class="nav" data-page="appointments">▣ <span>Appointments</span></button>
-    </nav>
-    <div class="side-footer">Hospital Management<br><small>Internship Project</small></div>
-  </aside>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><span>✚</span><div><b>MediCare Pro</b><small>Hospital Management</small></div></div>
+  <nav>
+    <button class="nav active" data-page="dashboard">⌂ <span>Dashboard</span></button>
+    <button class="nav" data-page="patients">♙ <span>Patients</span></button>
+    <button class="nav" data-page="doctors">⚕ <span>Doctors</span></button>
+    <button class="nav" data-page="appointments">▣ <span>Appointments</span></button>
+    <button class="nav" data-page="billing">₹ <span>Billing</span></button>
+    <button class="nav" data-page="pharmacy">▦ <span>Pharmacy</span></button>
+    <button class="nav" data-page="beds">▥ <span>Bed Management</span></button>
+    <button class="nav" data-page="emergency">⚠ <span>Emergency</span></button>
+    <button class="nav" data-page="reports">◫ <span>Reports</span></button>
+  </nav>
+  <div class="side-footer">MediCare Pro v2.0<br><small>Internship Demonstration</small></div>
+</aside>
 
-  <main>
-    <header>
-      <div><button id="mobileMenu" class="mobile-menu">☰</button><h1 id="pageTitle">Dashboard</h1><p id="pageSub">Overview of hospital operations</p></div>
-      <div class="header-right"><span id="date"></span><span class="avatar">V</span></div>
-    </header>
+<main>
+<header>
+  <div class="title-wrap"><button id="mobileMenu" class="mobile-menu">☰</button><div><h1 id="pageTitle">Dashboard</h1><p id="pageSub">Hospital overview & live operations</p></div></div>
+  <div class="header-right"><span class="live"><i></i> System Online</span><span id="date"></span><span class="avatar">V</span></div>
+</header>
 
-    <section id="dashboard" class="page active-page">
-      <div class="cards">
-        <div class="card"><div class="icon blue">♙</div><div><small>Total Patients</small><strong id="patientCount">0</strong></div></div>
-        <div class="card"><div class="icon green">⚕</div><div><small>Total Doctors</small><strong id="doctorCount">0</strong></div></div>
-        <div class="card"><div class="icon purple">▣</div><div><small>Appointments</small><strong id="appointmentCount">0</strong></div></div>
-        <div class="card"><div class="icon orange">✓</div><div><small>Today's Visits</small><strong id="todayCount">0</strong></div></div>
-      </div>
-      <div class="grid-two">
-        <div class="panel"><div class="panel-head"><h2>Recent Patients</h2><button class="link-btn" data-go="patients">View all</button></div><div id="recentPatients"></div></div>
-        <div class="panel"><div class="panel-head"><h2>Upcoming Appointments</h2><button class="link-btn" data-go="appointments">View all</button></div><div id="upcomingAppointments"></div></div>
-      </div>
-    </section>
+<section id="dashboard" class="page active-page">
+  <div class="cards">
+    <div class="card"><div class="icon blue">♙</div><div><small>Total Patients</small><strong id="patientCount">0</strong><em>Registered</em></div></div>
+    <div class="card"><div class="icon green">⚕</div><div><small>Doctors On Duty</small><strong id="doctorCount">0</strong><em>Available</em></div></div>
+    <div class="card"><div class="icon purple">▣</div><div><small>Today's Appointments</small><strong id="appointmentCount">0</strong><em>Scheduled</em></div></div>
+    <div class="card"><div class="icon orange">▥</div><div><small>Occupied Beds</small><strong id="occupiedCount">0</strong><em id="bedText">of 0 beds</em></div></div>
+  </div>
+  <div class="alert-banner"><span>⚠</span><div><b>Emergency Desk</b><p id="emergencySummary">No active emergency cases.</p></div><button class="primary small" data-go="emergency">Open Emergency</button></div>
+  <div class="grid-two">
+    <div class="panel"><div class="panel-head"><h2>Patient Overview</h2><button class="link-btn" data-go="patients">View all</button></div><div class="stat-row"><div><small>New today</small><b id="newToday">0</b></div><div><small>Discharged</small><b id="discharged">0</b></div><div><small>Critical</small><b id="critical">0</b></div></div><div class="section-title">Recent Patients</div><div id="recentPatients"></div></div>
+    <div class="panel"><div class="panel-head"><h2>Live Appointments</h2><button class="link-btn" data-go="appointments">Manage</button></div><div id="upcomingAppointments"></div></div>
+  </div>
+  <div class="grid-three">
+    <div class="panel"><div class="panel-head"><h2>Bed Occupancy</h2><span class="muted" id="occupancyPercent">0%</span></div><div class="progress"><span id="bedProgress"></span></div><div class="bed-mini"><span>ICU</span><b id="icuCount">0/0</b></div><div class="bed-mini"><span>General</span><b id="generalCount">0/0</b></div><div class="bed-mini"><span>Private</span><b id="privateCount">0/0</b></div></div>
+    <div class="panel"><div class="panel-head"><h2>Pharmacy Alerts</h2><button class="link-btn" data-go="pharmacy">Open</button></div><div id="pharmacyAlerts"></div></div>
+    <div class="panel"><div class="panel-head"><h2>System Activity</h2></div><div id="activity"></div></div>
+  </div>
+</section>
 
-    <section id="patients" class="page">
-      <div class="toolbar"><div><h2>Patient Records</h2><p>Manage patient information</p></div><div class="actions"><input id="patientSearch" placeholder="Search patients..."><button class="primary" onclick="openPatientModal()">+ Add Patient</button></div></div>
-      <div class="panel table-panel"><table><thead><tr><th>ID</th><th>Patient</th><th>Age</th><th>Gender</th><th>Condition</th><th>Doctor</th><th>Phone</th><th>Actions</th></tr></thead><tbody id="patientTable"></tbody></table></div>
-    </section>
+<section id="patients" class="page">
+<div class="toolbar"><div><h2>Patient Records</h2><p>Complete electronic patient registry</p></div><div class="actions"><input id="patientSearch" placeholder="Search name, ID, disease..."><button class="primary" onclick="openPatientModal()">+ Register Patient</button></div></div>
+<div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="In Patient">In Patient</button><button class="filter" data-filter="Discharged">Discharged</button><button class="filter" data-filter="Critical">Critical</button></div>
+<div class="panel table-panel"><table><thead><tr><th>Patient ID</th><th>Patient</th><th>Age/Gender</th><th>Condition</th><th>Doctor</th><th>Status</th><th>Phone</th><th>Actions</th></tr></thead><tbody id="patientTable"></tbody></table></div>
+</section>
 
-    <section id="doctors" class="page">
-      <div class="toolbar"><div><h2>Doctors</h2><p>Manage hospital doctors</p></div><button class="primary" onclick="openDoctorModal()">+ Add Doctor</button></div>
-      <div id="doctorGrid" class="doctor-grid"></div>
-    </section>
+<section id="doctors" class="page">
+<div class="toolbar"><div><h2>Medical Staff</h2><p>Doctors, specializations & availability</p></div><button class="primary" onclick="openDoctorModal()">+ Add Doctor</button></div>
+<div id="doctorGrid" class="doctor-grid"></div>
+</section>
 
-    <section id="appointments" class="page">
-      <div class="toolbar"><div><h2>Appointments</h2><p>Schedule and manage appointments</p></div><button class="primary" onclick="openAppointmentModal()">+ New Appointment</button></div>
-      <div class="panel table-panel"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead><tbody id="appointmentTable"></tbody></table></div>
-    </section>
-  </main>
+<section id="appointments" class="page">
+<div class="toolbar"><div><h2>Appointment Center</h2><p>Schedule, complete and track consultations</p></div><button class="primary" onclick="openAppointmentModal()">+ New Appointment</button></div>
+<div class="panel table-panel"><table><thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead><tbody id="appointmentTable"></tbody></table></div>
+</section>
 
-  <div id="modal" class="modal"><div class="modal-box"><div class="modal-head"><h2 id="modalTitle">Add</h2><button onclick="closeModal()">×</button></div><form id="modalForm"></form></div></div>
-  <div id="toast" class="toast"></div>
-  <script src="script.js"></script>
+<section id="billing" class="page">
+<div class="toolbar"><div><h2>Billing & Payments</h2><p>Invoices, charges and payment tracking</p></div><button class="primary" onclick="openBillModal()">+ Create Invoice</button></div>
+<div class="cards three"><div class="card"><div class="icon green">₹</div><div><small>Collected</small><strong id="paidTotal">₹0</strong></div></div><div class="card"><div class="icon orange">₹</div><div><small>Pending</small><strong id="pendingTotal">₹0</strong></div></div><div class="card"><div class="icon purple">#</div><div><small>Total Invoices</small><strong id="invoiceCount">0</strong></div></div></div>
+<div class="panel table-panel"><table><thead><tr><th>Invoice</th><th>Patient</th><th>Service</th><th>Amount</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody id="billTable"></tbody></table></div>
+</section>
+
+<section id="pharmacy" class="page">
+<div class="toolbar"><div><h2>Pharmacy & Inventory</h2><p>Medicine stock and low-stock monitoring</p></div><button class="primary" onclick="openMedicineModal()">+ Add Medicine</button></div>
+<div class="cards three"><div class="card"><div class="icon blue">▦</div><div><small>Medicines</small><strong id="medicineCount">0</strong></div></div><div class="card"><div class="icon orange">!</div><div><small>Low Stock</small><strong id="lowStock">0</strong></div></div><div class="card"><div class="icon green">₹</div><div><small>Inventory Value</small><strong id="inventoryValue">₹0</strong></div></div></div>
+<div class="panel table-panel"><table><thead><tr><th>Medicine</th><th>Category</th><th>Batch</th><th>Stock</th><th>Expiry</th><th>Price</th><th>Status</th><th>Action</th></tr></thead><tbody id="medicineTable"></tbody></table></div>
+</section>
+
+<section id="beds" class="page">
+<div class="toolbar"><div><h2>Bed Management</h2><p>Real-time ward occupancy</p></div><button class="primary" onclick="openBedModal()">+ Add Bed</button></div>
+<div id="bedGrid" class="bed-grid"></div>
+</section>
+
+<section id="emergency" class="page">
+<div class="toolbar"><div><h2>Emergency & Triage</h2><p>Priority cases and emergency response</p></div><button class="primary emergency-btn" onclick="openEmergencyModal()">+ Emergency Case</button></div>
+<div class="emergency-grid" id="emergencyGrid"></div>
+</section>
+
+<section id="reports" class="page">
+<div class="toolbar"><div><h2>Reports & Analytics</h2><p>Operational snapshot for management</p></div><button class="primary" onclick="window.print()">Print Report</button></div>
+<div class="report-grid">
+<div class="panel"><h2>Hospital KPI</h2><div class="kpi"><span>Patients</span><b id="rPatients">0</b></div><div class="kpi"><span>Doctors</span><b id="rDoctors">0</b></div><div class="kpi"><span>Appointments</span><b id="rAppts">0</b></div><div class="kpi"><span>Bed occupancy</span><b id="rBeds">0%</b></div></div>
+<div class="panel"><h2>Department Distribution</h2><div id="deptBars"></div></div>
+<div class="panel"><h2>Quick Summary</h2><p class="summary" id="reportSummary"></p></div>
+</div>
+</section>
+</main>
+
+<div id="modal" class="modal"><div class="modal-box"><div class="modal-head"><h2 id="modalTitle">Add</h2><button onclick="closeModal()">×</button></div><form id="modalForm"></form></div></div>
+<div id="toast" class="toast"></div>
+<script src="script.js"></script>
 </body>
 </html>

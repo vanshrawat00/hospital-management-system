@@ -1,24 +1,28 @@
-# MediCare Hospital Management System
+# MediCare Pro — Hospital Management System
 
-A Vercel-ready frontend project for a college internship/viva.
+A Vercel-ready, frontend-only hospital management system designed for a college internship/viva demonstration.
 
-## Features
-- Dashboard statistics
-- Patient CRUD (add, edit, delete, search)
-- Doctor management
-- Appointment booking and status
+## Modules
+- Dashboard with live operational statistics
+- Patient registration, search, edit, delete, status and critical flag
+- Doctor/staff management with departments and availability
+- Appointment scheduling and completion
+- Billing & invoice tracking
+- Pharmacy inventory with low-stock alerts
+- Bed/ward occupancy management
+- Emergency & triage cases
+- Reports & analytics
+- System activity feed
+- Responsive mobile UI
 - Browser localStorage persistence
-- Responsive UI
+- Print-friendly reports
 
 ## Deploy on Vercel
-1. Upload this folder to a GitHub repository.
-2. Go to Vercel and import the repository.
-3. Framework preset: **Other**
-4. Build command: leave empty.
-5. Output directory: leave empty.
-6. Deploy.
+Upload `index.html`, `style.css`, and `script.js` to GitHub, then import the repository into Vercel.
+Framework: Other. No build command. No output directory.
 
-No backend or database is required for the demo; data is stored in the browser's localStorage.
+## Important
+This is a demo system. Data is stored in the browser's localStorage, not a secure hospital database. It should not be used for real patient/medical data.
 
-## Viva
-The separate C implementation can demonstrate structures, functions, arrays, searching, deletion and file handling, while this web version demonstrates frontend implementation.
+## Viva positioning
+The project demonstrates frontend engineering plus the same management concepts as the C implementation: structures/data models, CRUD operations, searching, status management, records, and persistence. For a production version, the frontend would connect to a secure backend/API and database with authentication, role-based access, audit logs, encryption, and proper healthcare compliance.
